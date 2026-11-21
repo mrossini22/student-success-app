@@ -37,7 +37,12 @@ st.markdown(
     div[data-testid="stFormSubmitButton"] button, div[data-testid="stFormSubmitButton"] button * {color: #fff !important;}
     div[data-testid="stFormSubmitButton"] button:hover {background: #333 !important;}
     button[data-baseweb="tab"] {font-weight: 600;}
-    [data-testid="stDataFrame"] {border: 1px solid #000;}
+    table.perf {width: 100%; border-collapse: collapse; margin: 0.5rem 0 1rem 0;}
+    table.perf th, table.perf td {border: 1px solid #000; padding: 0.6rem 0.9rem; text-align: right; background: #fff;}
+    table.perf thead th {background: #000; color: #fff !important; text-align: right;}
+    table.perf thead th, table.perf thead th * {color: #fff !important;}
+    table.perf tbody th {text-align: left; font-weight: 700;}
+    table.perf th:first-child {text-align: left;}
     [data-baseweb="tab-highlight"] {background: #000 !important;}
     div[data-testid="stFormSubmitButton"] button:focus {box-shadow: none !important; border-color: #000 !important;}
     .stApp .result {padding: 1rem; border-radius: 12px; font-size: 1.3rem; font-weight: 700;}
@@ -130,8 +135,16 @@ with tab_about:
 
     st.subheader("Model performance")
     st.write(f"Accuracy on a held-out 20% test set: **{acc:.1%}**.")
-    st.dataframe(
-        pd.DataFrame(report).T.round(3).loc[["Fail", "Pass"], ["precision", "recall", "f1-score", "support"]]
+    perf = pd.DataFrame(report).T.loc[["Fail", "Pass"], ["precision", "recall", "f1-score", "support"]]
+    rows = "".join(
+        f"<tr><th>{name}</th><td>{r['precision']:.3f}</td><td>{r['recall']:.3f}</td>"
+        f"<td>{r['f1-score']:.3f}</td><td>{int(r['support'])}</td></tr>"
+        for name, r in perf.iterrows()
+    )
+    st.markdown(
+        "<table class='perf'><thead><tr><th>Class</th><th>Precision</th><th>Recall</th>"
+        f"<th>F1-score</th><th>Support</th></tr></thead><tbody>{rows}</tbody></table>",
+        unsafe_allow_html=True,
     )
 
     st.subheader("Limitations")
